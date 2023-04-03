@@ -1,34 +1,35 @@
-import httpx
-import json
+import subprocess
+import os
+import sys
 
-# Replace these with your own Supabase project URL and API key
-supabase_url = "https://xnnhyzgihyreuentwged.supabase.co"
-supabase_api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhubmh5emdpaHlyZXVlbnR3Z2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzYyODczMTIsImV4cCI6MTk5MTg2MzMxMn0.Xg9q0HXmWXzouYYPohaKAsyIA6lUQTRlX2CkuLJS47U"
-headers = {
-    "apikey": supabase_api_key,
-    "Content-Type": "application/json"
-}
 
-def create_project(project_name):
-    endpoint = f"{supabase_url}/v1/projects"
-    data = {
-        "name": "Test Project",
-        "organization_id": "combined-fuchsia-lion",
-        "db_pass": "redacted",
-        "region": "eu-west-1",
-        "plan": "free",
-        "kps_enabled": ""
-    }
-    print('JSON DUMP', json.dumps(data))
-    response = httpx.post(endpoint, headers=headers,  data=json.dumps(data))
+def run_command(command):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
+    stdout, stderr = process.communicate()
 
-    if response.status_code == 201:
-        print("Task created successfully")
-        print(response.json())
-    else:
-        print(f"Error: {response.status_code}")
-        print(response.text)
+    if process.returncode != 0:
+        print(f"Error executing command: {command}")
+        print(stderr)
+        sys.exit(1)
+
+    return stdout.strip()
+
+
+def create_supabase_project(project_name):
+    print(f"Creating a new Supabase project: {project_name}")
+
+    # Create a new directory for the project
+    os.makedirs(project_name, exist_ok=True)
+
+    # Change the current directory to the project directory
+    os.chdir(project_name)
+
+    # Run `supabase init` to initialize the project
+    run_command("supabase init")
+
+    print(f"Supabase project created successfully: {project_name}")
+
 
 if __name__ == "__main__":
-    project_name = "Test Project Creation"
-    create_project(project_name)
+    project_name = "my_supabase_project"
+    create_supabase_project(project_name)

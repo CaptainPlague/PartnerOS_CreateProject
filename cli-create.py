@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-from supabase import create_client
+from supabase import *
 from dotenv import load_dotenv
 
 
@@ -30,6 +30,15 @@ def create_supabase_project(project_name):
     run_command("supabase init")
 
     print(f"Supabase project created successfully: {project_name}")
+
+    # Load environment variables from the .env file
+    load_dotenv()
+
+    # Get the Supabase API URL and key from environment variables
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_KEY")
+
+    return supabase_url, supabase_key
 
 
 def get_supabase_client():
@@ -62,7 +71,9 @@ def fetch_data_from_table(table_name):
 
 if __name__ == "__main__":
     project_name = "my_supabase_project"
-    create_supabase_project(project_name)
+    supabase_url, supabase_key = create_supabase_project(project_name)
+    print(f"Supabase URL: {supabase_url}")
+    print(f"Supabase Key: {supabase_key}")
 
     # Example usage: fetch data from a table called "users"
     fetch_data_from_table("users")
